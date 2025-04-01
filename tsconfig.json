@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+	  "module": "Node16",         // Use Node.js module resolution
+	  "target": "ES2022",         // Target the latest ECMAScript version
+	  "outDir": "out",            // Output directory for compiled JavaScript
+	  "lib": [
+		"ES2022"                 // Include ES2022 features
+	  ],
+	  "sourceMap": true,          // Generate source maps for debugging
+	  "rootDir": "src",           // Root directory of TypeScript files
+	  "strict": true,             // Enable all strict type-checking options
+	  "types": ["node","mocha"]           // Include Node.js type definitions
+	},
+	"include": [
+	  "src/**/*.ts",              // Include all .ts files in the src directory
+	  "node_modules/vscode/**/*.d.ts"  // Include VSCode type definitions
+	],
+	"exclude": [
+	  "node_modules"              // Exclude node_modules from being compiled
+	]
+  }
+  
