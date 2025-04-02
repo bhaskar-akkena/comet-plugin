@@ -27,49 +27,45 @@
 
 import * as vscode from 'vscode';
 import axios from 'axios';
-import simpleGit from 'simple-git';// Correct import for simple-git
+import simpleGit from 'simple-git';
 
 export function activate(context: vscode.ExtensionContext) {
-    // Register a new command for generating commit messages
     let disposable = vscode.commands.registerCommand('extension.generateCommitMessage', async () => {
-        
-        // Step 1: Fetch the current git diff (staged changes)
         const diff = await getGitDiff();
+        if (!diff) {
+            vscode.window.showErrorMessage("No staged changes found!");
+            return;
+        }
 
-        // Step 2: Send the diff to your Comet commit message model
         const commitMessage = await generateCommitMessage(diff);
 
-        // Step 3: Insert the generated commit message into the commit input box
-        const commitInput = vscode.window.activeTextEditor;
-        if (commitInput) {
-            commitInput.insertSnippet(new vscode.SnippetString(commitMessage));
+        if (commitMessage) {
+            // Insert into Git commit input
+            await vscode.commands.executeCommand('workbench.view.scm');
+            await vscode.commands.executeCommand('git.inputBox', commitMessage);
         }
     });
 
     context.subscriptions.push(disposable);
 }
 
-// Function to get the git diff (staged changes)
 async function getGitDiff(): Promise<string> {
     try {
-        const gitInstance = simpleGit();  // Correct instantiation of simple-git
-        const diff = await gitInstance.diff();  // Fetches the diff of staged changes
-        return diff;
+        const gitInstance = simpleGit();
+        const diff = await gitInstance.diff(['--staged']);  // Fetch staged changes only
+        return diff || '';
     } catch (error) {
         vscode.window.showErrorMessage('Error fetching Git diff');
         return '';
     }
 }
 
-// Function to send the diff to the Comet API and generate a commit message
 async function generateCommitMessage(diff: string): Promise<string> {
     try {
-        const response = await axios.post('http://your-api-url/generate', {
-            diff: diff
-        });
-        return response.data.commitMessage;
+        const response = await axios.post('http://0.0.0.0:8000/generate', { diff });
+        return response.data.commit_message;  // Fixed key name
     } catch (error) {
         vscode.window.showErrorMessage('Error generating commit message');
-        return 'Failed to generate commit message';
+        return '';
     }
 }
