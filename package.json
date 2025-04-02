@@ -9,13 +9,15 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:extension.generateCommitMessage"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "comet-commit-message-generator.helloWorld",
-        "title": "Hello World"
+        "command": "extension.generateCommitMessage",
+        "title": "Generate Commit Message"
       }
     ]
   },

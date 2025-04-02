@@ -1,0 +1,10 @@
+To test plugin and to see if commands have been registered in vs code follow these steps:
+
+In terminal in vscode opened in the plugins directory run the following:
+    npm install
+    npm run compile
+    code .
+
+In this new window press F5.  Will open up another vscode window that now has the extension hopefully registered.
+
+Press ctrl+shift+P and look for and run the plugin command.  Currently it's called "extension.generateCommitMessage"
