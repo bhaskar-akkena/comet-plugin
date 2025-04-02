@@ -42,20 +42,54 @@ export function activate(context: vscode.ExtensionContext) {
         if (commitMessage) {
             // Insert into Git commit input
             await vscode.commands.executeCommand('workbench.view.scm');
-            await vscode.commands.executeCommand('git.inputBox', commitMessage);
-        }
+            // await vscode.commands.executeCommand('git.inputBox', commitMessage);
+            const gitExtension = vscode.extensions.getExtension('vscode.git')?.exports;
+            if (gitExtension) {
+                const api = gitExtension.getAPI(1);
+                const repo = api.repositories[0];
+                if (repo) {
+                    repo.inputBox.value = commitMessage;
+                } else {
+                    vscode.window.showErrorMessage('No Git repository found.');
+                }
+            } else {
+                vscode.window.showErrorMessage('Git extension not found.');
+            }
+                    }
     });
 
     context.subscriptions.push(disposable);
 }
 
+// async function getGitDiff(): Promise<string> {
+//     try {
+//         const gitInstance = simpleGit();
+//         const diff = await gitInstance.diff(['--staged']);  // Fetch staged changes only
+//         return diff || '';
+//     } catch (error) {
+//         vscode.window.showErrorMessage('Error fetching Git diff');
+//         return '';
+//     }
+// }
 async function getGitDiff(): Promise<string> {
     try {
-        const gitInstance = simpleGit();
-        const diff = await gitInstance.diff(['--staged']);  // Fetch staged changes only
-        return diff || '';
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (!workspaceFolders) {
+            vscode.window.showErrorMessage('No workspace folder found.');
+            return '';
+        }
+
+        const gitInstance = simpleGit(workspaceFolders[0].uri.fsPath);
+        const diff = await gitInstance.diff(['--staged']); // Fetches staged changes only
+
+        if (!diff.trim()) {
+            vscode.window.showWarningMessage('No staged changes found.');
+            return '';
+        }
+
+        return diff;
     } catch (error) {
-        vscode.window.showErrorMessage('Error fetching Git diff');
+        vscode.window.showErrorMessage('Error fetching Git diff: ' + error);
         return '';
     }
 }
